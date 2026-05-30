@@ -17,10 +17,10 @@ from scipy import stats
 from src.config import config
 from src.utils import setup_logger
 
-
 # ==========================================================
 # Load data
 # ==========================================================
+
 
 def load_data(logger):
 
@@ -35,6 +35,7 @@ def load_data(logger):
 # Split groups
 # ==========================================================
 
+
 def split_groups(df):
 
     ps = df[df["PS"] == 1]
@@ -47,42 +48,41 @@ def split_groups(df):
 # Continuous variables
 # ==========================================================
 
+
 def analyze_continuous(var, ps, nps):
 
-    ps_vals = ps[var].dropna()
-    nps_vals = nps[var].dropna()
+    ps_vals = pd.to_numeric(ps[var], errors="coerce").dropna()
+    nps_vals = pd.to_numeric(nps[var], errors="coerce").dropna()
 
-    # skip if empty
     if len(ps_vals) < 2 or len(nps_vals) < 2:
         return None, None, np.nan
 
-    # normality check (robust)
     try:
-        p1 = stats.shapiro(ps_vals.sample(min(50, len(ps_vals)))).pvalue
-        p2 = stats.shapiro(nps_vals.sample(min(50, len(nps_vals)))).pvalue
-    except:
-        p1, p2 = 0, 0
+        _, p = stats.mannwhitneyu(ps_vals, nps_vals, alternative="two-sided")
+    except Exception:
+        p = np.nan
 
-    normal = (p1 > 0.05) and (p2 > 0.05)
+    # mean
+    ps_mean = ps_vals.mean()
+    nps_mean = nps_vals.mean()
 
-    if normal:
-        stat, p = stats.ttest_ind(ps_vals, nps_vals, equal_var=False)
+    # range (min-max)
+    ps_min = ps_vals.min()
+    ps_max = ps_vals.max()
 
-        ps_str = f"{ps_vals.mean():.2f} ± {ps_vals.std():.2f}"
-        nps_str = f"{nps_vals.mean():.2f} ± {nps_vals.std():.2f}"
+    nps_min = nps_vals.min()
+    nps_max = nps_vals.max()
 
-    else:
-        stat, p = stats.mannwhitneyu(ps_vals, nps_vals)
+    ps_str = f"{ps_mean:.2f} ({ps_min:.2f}-{ps_max:.2f})"
+    nps_str = f"{nps_mean:.2f} ({nps_min:.2f}-{nps_max:.2f})"
 
-        ps_str = f"{ps_vals.median():.2f} ({ps_vals.quantile(0.25):.2f}-{ps_vals.quantile(0.75):.2f})"
-        nps_str = f"{nps_vals.median():.2f} ({nps_vals.quantile(0.25):.2f}-{nps_vals.quantile(0.75):.2f})"
-
-    return ps_str, nps_str, p
+    return ps_str, nps_str, round(p, 4) if pd.notna(p) else np.nan
 
 
 # ==========================================================
 # Categorical variables
 # ==========================================================
+
 
 def analyze_categorical(var, df, ps, nps):
 
@@ -97,9 +97,7 @@ def analyze_categorical(var, df, ps, nps):
     def fmt(group):
         vc = group.value_counts(dropna=False)
         total = len(group)
-        return "; ".join(
-            [f"{k}: {v} ({v/total*100:.1f}%)" for k, v in vc.items()]
-        )
+        return "; ".join([f"{k}: {v} ({v/total*100:.1f}%)" for k, v in vc.items()])
 
     return fmt(ps[var]), fmt(nps[var]), p
 
@@ -107,6 +105,7 @@ def analyze_categorical(var, df, ps, nps):
 # ==========================================================
 # Variable filtering
 # ==========================================================
+
 
 def select_variables(df):
 
@@ -131,6 +130,7 @@ def select_variables(df):
 # Main Table 1 builder
 # ==========================================================
 
+
 def build_table1(df, logger):
 
     ps, nps = split_groups(df)
@@ -149,18 +149,16 @@ def build_table1(df, logger):
 
             # categorical → non-numeric
             else:
-
+                continue
+                # skipped for now, cuz we do not need these variables for further analysis
                 ps_s, nps_s, p = analyze_categorical(var, df, ps, nps)
 
             if p is None:
                 continue
 
-            results.append({
-                "Variable": var,
-                "PS": ps_s,
-                "NPS": nps_s,
-                "P value": round(p, 4)
-            })
+            results.append(
+                {"Variable": var, "PS": ps_s, "NPS": nps_s, "P value": f"{p:.4f}" if pd.notna(p) else ""}
+            )
 
         except Exception as e:
             logger.warning(f"Skip {var}: {e}")
@@ -168,7 +166,7 @@ def build_table1(df, logger):
     table1 = pd.DataFrame(results)
 
     # optional: sort by variable name
-    table1 = table1.sort_values("Variable")
+    # table1 = table1.sort_values("Variable")
 
     return table1
 
@@ -176,6 +174,7 @@ def build_table1(df, logger):
 # ==========================================================
 # Save
 # ==========================================================
+
 
 def save_table(table1, logger):
 
@@ -190,12 +189,10 @@ def save_table(table1, logger):
 # Main
 # ==========================================================
 
+
 def main():
 
-    logger = setup_logger(
-        config.LOG_DIR / "03_baseline_table.log",
-        "table1"
-    )
+    logger = setup_logger(config.LOG_DIR / "03_baseline_table.log", "table1")
 
     logger.info("=" * 60)
     logger.info("START TABLE 1")

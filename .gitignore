@@ -221,6 +221,7 @@ __marimo__/
 data/
 docs/
 logs/
+tables/
 
 # MacOS
 .DS_Store

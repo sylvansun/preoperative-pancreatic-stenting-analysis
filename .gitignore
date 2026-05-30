@@ -220,6 +220,7 @@ __marimo__/
 # docs & data
 data/
 docs/
+logs/
 
 # MacOS
 .DS_Store

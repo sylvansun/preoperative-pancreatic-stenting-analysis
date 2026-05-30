@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# docs & data
+data/
+docs/
+
+# MacOS
+.DS_Store

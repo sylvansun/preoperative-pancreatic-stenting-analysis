@@ -157,7 +157,12 @@ def build_table1(df, logger):
                 continue
 
             results.append(
-                {"Variable": var, "PS": ps_s, "NPS": nps_s, "P value": f"{p:.4f}" if pd.notna(p) else ""}
+                {
+                    "Variable": var,
+                    "PS": ps_s,
+                    "NPS": nps_s,
+                    "P value": f"{p:.4f}" if pd.notna(p) else "",
+                }
             )
 
         except Exception as e:

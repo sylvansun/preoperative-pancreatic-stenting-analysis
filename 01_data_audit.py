@@ -1,60 +1,11 @@
 """
 01_data_audit.py
-
-Purpose:
-    Perform initial data quality check on raw clinical dataset.
-
-Outputs:
-    data/audit/
-        variable_dictionary.xlsx
-        missing_summary.xlsx
-        ps_distribution.xlsx
-        duplicate_hospital_id.xlsx
-
-Logs:
-    logs/01_data_audit.log
 """
 
-from pathlib import Path
-import logging
 import pandas as pd
 
-# ==========================================================
-# Path Configuration
-# ==========================================================
-
-ROOT = Path(__file__).resolve().parent
-
-DATA_FILE = ROOT / "data" / "raw.xlsx"
-
-AUDIT_DIR = ROOT / "data" / "audit"
-LOG_DIR = ROOT / "logs"
-
-AUDIT_DIR.mkdir(parents=True, exist_ok=True)
-LOG_DIR.mkdir(parents=True, exist_ok=True)
-
-
-# ==========================================================
-# Logger
-# ==========================================================
-
-
-def setup_logger():
-
-    logger = logging.getLogger("data_audit")
-    logger.setLevel(logging.INFO)
-
-    logger.handlers.clear()
-
-    handler = logging.FileHandler(LOG_DIR / "01_data_audit.log", encoding="utf-8")
-
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    return logger
-
+from src.config import config
+from src.utils import setup_logger
 
 # ==========================================================
 # Load Data
@@ -65,7 +16,7 @@ def load_data(logger):
 
     logger.info("Loading raw dataset")
 
-    df = pd.read_excel(DATA_FILE)
+    df = pd.read_excel(config.RAW_FILE)
 
     logger.info(f"Shape: {df.shape}")
 
@@ -73,7 +24,7 @@ def load_data(logger):
 
 
 # ==========================================================
-# Audit: Variable Dictionary
+# Variable Dictionary
 # ==========================================================
 
 
@@ -81,13 +32,13 @@ def export_variable_dictionary(df, logger):
 
     out = pd.DataFrame({"variable": df.columns, "dtype": df.dtypes.astype(str)})
 
-    out.to_excel(AUDIT_DIR / "variable_dictionary.xlsx", index=False)
+    out.to_excel(config.AUDIT_DIR / "variable_dictionary.xlsx", index=False)
 
     logger.info("Variable dictionary saved")
 
 
 # ==========================================================
-# Audit: Missing Data
+# Missing Data
 # ==========================================================
 
 
@@ -99,13 +50,13 @@ def export_missing_summary(df, logger):
 
     out = out.sort_values("missing_pct", ascending=False)
 
-    out.to_excel(AUDIT_DIR / "missing_summary.xlsx", index=False)
+    out.to_excel(config.AUDIT_DIR / "missing_summary.xlsx", index=False)
 
     logger.info("Missing summary saved")
 
 
 # ==========================================================
-# Audit: PS Distribution
+# PS Distribution
 # ==========================================================
 
 
@@ -119,13 +70,13 @@ def export_ps_distribution(df, logger):
 
     out.columns = ["PS", "n"]
 
-    out.to_excel(AUDIT_DIR / "ps_distribution.xlsx", index=False)
+    out.to_excel(config.AUDIT_DIR / "ps_distribution.xlsx", index=False)
 
     logger.info("PS distribution saved")
 
 
 # ==========================================================
-# Audit: Duplicate ID Check
+# Duplicate Check
 # ==========================================================
 
 
@@ -135,9 +86,9 @@ def export_duplicate_check(df, logger):
         logger.warning("住院号 column not found")
         return
 
-    dup = df[df["住院号"].duplicated(keep=False)].copy()
+    dup = df[df["住院号"].duplicated(keep=False)]
 
-    dup.to_excel(AUDIT_DIR / "duplicate_hospital_id.xlsx", index=False)
+    dup.to_excel(config.AUDIT_DIR / "duplicate_hospital_id.xlsx", index=False)
 
     logger.info(f"Duplicate records: {len(dup)}")
 
@@ -149,7 +100,7 @@ def export_duplicate_check(df, logger):
 
 def main():
 
-    logger = setup_logger()
+    logger = setup_logger(config.LOG_DIR / "01_data_audit.log", "data_audit")
 
     logger.info("=" * 50)
     logger.info("START DATA AUDIT")

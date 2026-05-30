@@ -9,32 +9,10 @@ Outputs:
     logs/02_data_cleaning.log
 """
 
-from src.config import config
 import pandas as pd
-import logging
 import numpy as np
-
-# ==========================================================
-# Logger
-# ==========================================================
-
-
-def setup_logger():
-
-    logger = logging.getLogger("data_cleaning")
-    logger.setLevel(logging.INFO)
-
-    logger.handlers.clear()
-
-    handler = logging.FileHandler(config.LOG_DIR / "02_data_cleaning.log")
-
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    return logger
-
+from src.config import config
+from src.utils import setup_logger
 
 # ==========================================================
 # Load raw data
@@ -155,7 +133,9 @@ def save_dataset(df, logger):
 
 def main():
 
-    logger = setup_logger()
+    logger = setup_logger(config.LOG_DIR / "02_data_cleaning.log", "data_cleaning")
+
+    logger.info("START DATA CLEANING")
 
     logger.info("=" * 50)
     logger.info("START DATA CLEANING")

@@ -13,6 +13,7 @@ python 01_data_audit.py
 python 02_data_cleaning.py
 python 03_baseline_table.py
 python 04_outcome_analysis.py
+python 05_univariate_logistic.py
 
 echo "======================================"
 echo "PIPELINE END"

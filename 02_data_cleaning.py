@@ -70,6 +70,29 @@ def encode_basic_vars(df, logger):
     return df
 
 
+def rename_columns(df, logger):
+
+    rename_map = {
+        "病人年龄": "age",
+        "手术时间": "operation_time",
+        "出血量": "blood_loss",
+        # pancreatic duct variables
+        "胰管直径mm": "mpd_diameter_mm",
+        "胰管距离mm": "mpd_distance_mm",
+        "胆管距离mm": "cbd_distance_mm",
+        # tumor
+        "肿瘤大小": "tumor_size_mm",
+    }
+
+    existing_map = {k: v for k, v in rename_map.items() if k in df.columns}
+
+    df = df.rename(columns=existing_map)
+
+    logger.info(f"Renamed columns: {existing_map}")
+
+    return df
+
+
 # ==========================================================
 # Derived clinical variables
 # ==========================================================
@@ -175,6 +198,7 @@ def main():
     df = load_data(logger)
 
     df = drop_pii(df, logger)
+    df = rename_columns(df, logger)
     df = encode_basic_vars(df, logger)
     df = create_derived_vars(df, logger)
     df = run_checks(df, logger)

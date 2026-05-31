@@ -101,6 +101,30 @@ def create_derived_vars(df, logger):
 
         logger.info("Created operation_group (En vs Child+MP+DP)")
 
+    # Any pancreatic fistula
+    if "相关并发症(胰瘘)" in df.columns:
+
+        df["fistula_any"] = (
+            df["相关并发症(胰瘘)"].notna() & (df["相关并发症(胰瘘)"] != 0)
+        ).astype(int)
+
+    # Clinically relevant POPF
+    if "胰瘘分级ISGPF" in df.columns:
+
+        df["cr_popf"] = (df["胰瘘分级ISGPF"].isin(["B", "C"])).astype(int)
+
+    # Any infection
+    if "相关并发症(感染)" in df.columns:
+
+        df["infection_any"] = (
+            df["相关并发症(感染)"].notna() & (df["相关并发症(感染)"] != 0)
+        ).astype(int)
+
+    # Reoperation
+    if "再次手术" in df.columns:
+
+        df["reoperation"] = (df["再次手术"].notna() & (df["再次手术"] != 0)).astype(int)
+
     return df
 
 

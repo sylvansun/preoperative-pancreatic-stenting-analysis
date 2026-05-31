@@ -157,7 +157,7 @@ def plot_forest(table):
 
 def plot_pvalue_ranking(table):
 
-    df = table.sort_values("P")
+    df = table.sort_values("P", ascending=False)
 
     plt.figure(figsize=(8, 5))
 

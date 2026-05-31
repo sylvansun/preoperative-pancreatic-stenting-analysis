@@ -1,3 +1,7 @@
+"""
+config.py
+"""
+
 from pathlib import Path
 
 
@@ -21,6 +25,8 @@ class Config:
         self.ANALYSIS_FILE = self.DATA_DIR / "analysis_dataset.pkl"
         self.LOG_DIR = self.ROOT / "logs"
 
+        # variables
+        self.CATEGORICAL_VARS = {"operation_group"}
         # ensure folders exist
         self._init_dirs()
 

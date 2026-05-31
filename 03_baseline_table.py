@@ -148,10 +148,12 @@ def build_table1(df, logger):
                 ps_s, nps_s, p = analyze_continuous(var, ps, nps)
 
             # categorical → non-numeric
+            elif var in config.CATEGORICAL_VARS:
+
+                ps_s, nps_s, p = analyze_categorical(var, df, ps, nps)
+
             else:
                 continue
-                # skipped for now, cuz we do not need these variables for further analysis
-                ps_s, nps_s, p = analyze_categorical(var, df, ps, nps)
 
             if p is None:
                 continue

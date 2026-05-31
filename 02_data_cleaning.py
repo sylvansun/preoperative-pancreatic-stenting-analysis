@@ -94,6 +94,13 @@ def create_derived_vars(df, logger):
 
         df["mpd_close"] = df["胰管距离≤2mm"].fillna(0).astype(int)
 
+    # generate operation name
+    if "手术名称" in df.columns:
+
+        df["operation_group"] = np.where(df["手术名称"] == "En", "En", "Other")
+
+        logger.info("Created operation_group (En vs Child+MP+DP)")
+
     return df
 
 

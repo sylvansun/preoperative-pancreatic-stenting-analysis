@@ -43,14 +43,13 @@ def load_data(logger):
 def select_variables(df):
 
     candidates = [
-        "PS",
         "sex",
-        "tumor_large",
+        "PS",
         "tumor_high_risk_location",
         "tumor_size_mm",
-        "mpd_close",
-        "mpd_diameter_mm",
         "cbd_distance_mm",
+        "mpd_diameter_mm",
+        "mpd_distance_mm",
     ]
 
     return [v for v in candidates if v in df.columns]
